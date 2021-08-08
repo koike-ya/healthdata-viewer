@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <button v-on:click="connectToOura">Ouraと連携する</button>
-    <p>{{ routes }}</p>
+    <p>{{ token }}</p>
   </div>
 </template>
 
@@ -14,16 +14,28 @@ export default {
   },
   data: function () {
     return {
-      routes: undefined
+      token: undefined
     }
   },
   mounted: async function () {
+    const backendUrl = 'http://localhost:3000'
+
+    const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
+    console.log(isTokenExists.data)
+    if (isTokenExists.data.access_token) {
+      const accessToken = isTokenExists.data.access_token
+      this.token = accessToken
+      console.log(accessToken)
+      return
+    }
+
     const code = this.extractQueryValueFromURI('code')
     if (code) {
       const backendUrl = 'http://localhost:3000'
-      const res = await axios.get(`${backendUrl}/auth?code=${code}`)
+      const res = await axios.get(`${backendUrl}/fetchToken?code=${code}`)
       const accessToken = res.data.access_token
       console.log(accessToken)
+      this.token = accessToken
     }
   },
   methods: {

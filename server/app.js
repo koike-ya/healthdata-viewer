@@ -1,5 +1,7 @@
 const express = require('express')
-const axios = require('axios');
+const mongo = require('./mongo')
+const fetchAccessToken = require('./fetchAccessToken')
+
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
@@ -10,38 +12,28 @@ app.get('/', (req, res) => {
   res.send('Response')
 })
 
-app.post('/', (req, res) => {
-  res.send('Response')
-})
-
-app.get('/auth', async function(req, res) {
+app.get('/isTokenExists', async function(req, res) {
   res.header('Access-Control-Allow-Origin', '*');
 
+  const accessToken = await mongo.readAccessToken()
+  res.send({'access_token': accessToken})
+})
+
+app.get('/fetchToken', async function(req, res) {
+  res.header('Access-Control-Allow-Origin', '*');
+
+  // codeがないときは、tokenがすでにあるかの問い合わせ
   if (!('code' in req.query)) {
-    res.send('no code provided.')
+    res.send('no code is provided')
     return
   }
 
-  const baseUrl = 'https://cloud.ouraring.com'
-  const url = `${baseUrl}/oauth/token`
-  let body = new URLSearchParams();
-  body.append('grant_type', 'authorization_code')
-  body.append('code', req.query.code)
-  body.append('client_id', process.env.OURA_CLIENT_ID)
-  body.append('client_secret', process.env.OURA_CLIENT_SECRET)
-
-  try {
-    const accessTokenRes = await axios.post(url, body)
-    console.log(accessTokenRes.data);
-    res.send({
-      access_token: accessTokenRes.data.access_token
-    })
-  } catch (error) {
-    console.error(error);
-    res.send({
-      error: error
-    })
+  accessToken = await fetchAccessToken.fetchAccessToken(req)
+  if (accessToken) {
+    await mongo.insertAccessToken(accessToken).catch(console.dir)
   }
+  console.log(accessToken)
+  res.send({'access_token': accessToken})
 })
 
 app.listen(port, () => {
