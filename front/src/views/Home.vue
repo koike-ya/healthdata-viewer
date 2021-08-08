@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <button v-on:click="connectToOura">Ouraと連携する</button>
-    <p>{{ token }}</p>
+    <p>{{ sleepData }}</p>
   </div>
 </template>
 
@@ -14,18 +14,22 @@ export default {
   },
   data: function () {
     return {
-      token: undefined
+      sleepData: undefined
     }
   },
   mounted: async function () {
     const backendUrl = 'http://localhost:3000'
 
+    const sleepRes = await axios.get(`${backendUrl}/sleep?start=2021-01-01&end=2021-01-05`)
+    console.log(sleepRes)
+    if (sleepRes.data.sleep) {
+      this.sleepData = sleepRes.data.sleep
+    }
+
     const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
-    console.log(isTokenExists.data)
     if (isTokenExists.data.access_token) {
       const accessToken = isTokenExists.data.access_token
       this.token = accessToken
-      console.log(accessToken)
       return
     }
 
@@ -34,7 +38,6 @@ export default {
       const backendUrl = 'http://localhost:3000'
       const res = await axios.get(`${backendUrl}/fetchToken?code=${code}`)
       const accessToken = res.data.access_token
-      console.log(accessToken)
       this.token = accessToken
     }
   },
