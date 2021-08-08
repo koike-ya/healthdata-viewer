@@ -1,16 +1,18 @@
 <template>
   <div class="home">
     <button v-on:click="connectToOura">Ouraと連携する</button>
-    <p>{{ sleepData }}</p>
+    <SleepChart />
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import SleepChart from './SleepChart.vue'
 
 export default {
   name: 'Home',
   components: {
+    SleepChart
   },
   data: function () {
     return {
@@ -20,18 +22,12 @@ export default {
   mounted: async function () {
     const backendUrl = 'http://localhost:3000'
 
-    const sleepRes = await axios.get(`${backendUrl}/sleep?start=2021-01-01&end=2021-01-05`)
-    console.log(sleepRes)
-    if (sleepRes.data.sleep) {
-      this.sleepData = sleepRes.data.sleep
-    }
-
-    const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
-    if (isTokenExists.data.access_token) {
-      const accessToken = isTokenExists.data.access_token
-      this.token = accessToken
-      return
-    }
+    // const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
+    // if (isTokenExists.data.access_token) {
+    //   const accessToken = isTokenExists.data.access_token
+    //   this.token = accessToken
+    //   return
+    // }
 
     const code = this.extractQueryValueFromURI('code')
     if (code) {

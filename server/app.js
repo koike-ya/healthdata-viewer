@@ -48,9 +48,10 @@ app.get('/sleep', async function(req, res) {
   const authHeaders = {'Authorization': `Bearer ${token}`}
   const start = req.query.start
   const end = req.query.end
-  const [oldest, newest] = await mongo.readOldestAndNewestTimestamp('sleep')
+  // const [oldest, newest] = await mongo.readOldestAndNewestTimestamp('sleep')
   const [queryStart, queryEnd] = [start, end]
   const url = `https://api.ouraring.com/v1/sleep?start=${queryStart}&end=${queryEnd}`
+  console.log(url)
   const ouraRes = await axios.get(url, {
     headers: authHeaders
   })

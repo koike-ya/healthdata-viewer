@@ -1,17 +1,20 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import SleepChart from '../views/SleepChart.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    component: Home
-  },
-  {
-    path: '/home',
-    component: Home
+    component: Home,
+    children: [
+      {
+        path: 'sleep',
+        component: SleepChart
+      }
+    ]
   }
 ]
 
