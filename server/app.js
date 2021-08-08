@@ -1,5 +1,6 @@
 const express = require('express')
 const mongo = require('./mongo')
+const axios = require('axios');
 const fetchAccessToken = require('./fetchAccessToken')
 
 if (process.env.NODE_ENV !== 'production') {
@@ -38,4 +39,21 @@ app.get('/fetchToken', async function(req, res) {
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
+})
+
+app.get('/sleep', async function(req, res) {
+  res.header('Access-Control-Allow-Origin', '*');
+
+  const token = await mongo.readAccessToken()
+  const authHeaders = {'Authorization': `Bearer ${token}`}
+  const start = req.query.start
+  const end = req.query.end
+  const [oldest, newest] = await mongo.readOldestAndNewestTimestamp('sleep')
+  const [queryStart, queryEnd] = [start, end]
+  const url = `https://api.ouraring.com/v1/sleep?start=${queryStart}&end=${queryEnd}`
+  const ouraRes = await axios.get(url, {
+    headers: authHeaders
+  })
+  // mongo.insertData('sleep', ouraRes.data.sleep)
+  res.send(ouraRes.data)
 })
