@@ -1,7 +1,8 @@
 const express = require('express')
 const mongo = require('./mongo')
 const axios = require('axios');
-const fetchAccessToken = require('./fetchAccessToken')
+const fetchFromOura = require('./fetchFromOura');
+const util = require('./util')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -30,7 +31,7 @@ app.get('/fetchToken', async function(req, res) {
     return
   }
 
-  accessToken = await fetchAccessToken.fetchAccessToken(req)
+  accessToken = await fetchFromOura.fetchAccessToken(req)
   if (accessToken) {
     await mongo.insertAccessToken(accessToken).catch(console.dir)
   }
@@ -49,13 +50,36 @@ app.get('/sleep', async function(req, res) {
   const authHeaders = {'Authorization': `Bearer ${token}`}
   const start = req.query.start
   const end = req.query.end
-  // const [oldest, newest] = await mongo.readOldestAndNewestTimestamp('sleep')
-  const [queryStart, queryEnd] = [start, end]
-  const url = `https://api.ouraring.com/v1/sleep?start=${queryStart}&end=${queryEnd}`
-  console.log(url)
-  const ouraRes = await axios.get(url, {
-    headers: authHeaders
-  })
-  // mongo.insertData('sleep', ouraRes.data.sleep)
-  res.send(ouraRes.data)
+  const [oldest, newest] = await mongo.readOldestAndNewestTimestamp('sleep')
+  console.log(`oldest: ${oldest}\nnewest: ${newest}`)
+
+  let queryList = []
+  if (oldest === null || newest === null) {
+    queryList.push([start, end])
+  } else {
+    queryList = util.calculateURLQueryDates(start, end, util.formatDate(oldest), util.formatDate(newest))
+  }
+
+  let data
+  if (queryList !== []) {
+    for (const [queryStart, queryEnd] of queryList) {
+      const url = `https://api.ouraring.com/v1/sleep?start=${queryStart}&end=${queryEnd}`
+      console.log(url)
+      const ouraRes = await axios.get(url, {
+        headers: authHeaders
+      })
+      data = ouraRes.data.sleep
+      data.forEach((row) => {
+        row.summary_date = util.parseDate(row.summary_date)
+      })
+      if (data.length) {
+        await mongo.insertData('sleep', data).catch(console.dir)
+      }
+    }
+  }
+  filter = { summary_date: { $gte: util.parseDate(start), $lte: util.parseDate(end) }}
+  data = await mongo.readWithFilter('sleep', filter)
+  console.log(`data length: ${data.length}`)
+  res.send(data)
+  
 })

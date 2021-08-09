@@ -40,8 +40,8 @@ export default {
       const url = `${backendUrl}/sleep?start=${this.formatDate(this.startDate)}&end=${this.formatDate(this.endDate)}`
 
       const sleepRes = await axios.get(url)
-      if (sleepRes.data.sleep) {
-        const sleepData = sleepRes.data.sleep
+      if (sleepRes.data.length) {
+        const sleepData = sleepRes.data
         for (const one of sleepData) {
           summaryDates.push(one.summary_date)
           scores.push(one.score)
@@ -59,9 +59,9 @@ export default {
       }
     },
     formatDate (dt) {
-      var y = dt.getFullYear()
-      var m = ('00' + (dt.getMonth() + 1)).slice(-2)
-      var d = ('00' + dt.getDate()).slice(-2)
+      const y = dt.getFullYear()
+      const m = ('00' + (dt.getMonth() + 1)).slice(-2)
+      const d = ('00' + dt.getDate()).slice(-2)
       return (y + '-' + m + '-' + d)
     },
     pickDates () {
