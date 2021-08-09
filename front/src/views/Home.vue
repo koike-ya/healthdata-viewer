@@ -1,7 +1,6 @@
 <template>
   <div class="home">
-    <button v-on:click="connectToOura">Ouraと連携する</button>
-    <p>{{ token }}</p>
+    <button v-show="token === null" v-on:click="connectToOura">Ouraと連携する</button>
   </div>
 </template>
 
@@ -10,22 +9,20 @@ import axios from 'axios'
 
 export default {
   name: 'Home',
-  components: {
-  },
   data: function () {
     return {
-      token: undefined
+      sleepData: null,
+      token: null
     }
   },
-  mounted: async function () {
+  created: async function () {
     const backendUrl = 'http://localhost:3000'
 
     const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
-    console.log(isTokenExists.data)
     if (isTokenExists.data.access_token) {
       const accessToken = isTokenExists.data.access_token
       this.token = accessToken
-      console.log(accessToken)
+      this.$router.replace('sleep') // この後もコードは実行される
       return
     }
 
@@ -34,8 +31,8 @@ export default {
       const backendUrl = 'http://localhost:3000'
       const res = await axios.get(`${backendUrl}/fetchToken?code=${code}`)
       const accessToken = res.data.access_token
-      console.log(accessToken)
       this.token = accessToken
+      this.$router.replace('sleep') // この後もコードは実行される
     }
   },
   methods: {

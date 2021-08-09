@@ -18,6 +18,54 @@ exports.insertAccessToken = async function(token) {
   }
 }
 
+exports.insertData = async function(category, data) {
+  try {
+    await client.connect()
+    const database = client.db('healthdata')
+    const collection = database.collection(category)
+    const res = await collection.insertMany(data)
+
+    console.log(
+      `${res.insertedCount} documents were inserted with the _id: ${res.insertedId}`,
+    )
+  } catch (error) {
+    console.log(error)
+  } finally {
+    await client.close();
+  }
+}
+
+exports.readOldestAndNewestTimestamp = async function(category) {
+  const sort = { summary_date: -1 }
+  try {
+    await client.connect()
+    const database = client.db('healthdata')
+    const collection = database.collection(category)
+    let query = await collection.find().sort({ summary_date: 1}).limit(1).toArray()
+    if (query.length === 0) {
+      return [null, null]
+    }
+    const oldest = query[0].summary_date
+    query = await collection.find().sort(sort).limit(1).toArray()
+    const newest = query[0].summary_date
+    return [oldest, newest]
+  } finally {
+    await client.close()
+  }
+}
+
+exports.readWithFilter = async function(category, filter = {}) {
+  try {
+    await client.connect()
+    const database = client.db('healthdata')
+    const collection = database.collection(category)
+    const records = await collection.find(filter).toArray()
+    return records
+  } finally {
+    await client.close()
+  }
+}
+
 exports.readAccessToken = async function() {
   const query = {}
   try {

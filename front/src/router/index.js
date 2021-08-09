@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import SleepChart from '../views/SleepChart.vue'
 
 Vue.use(VueRouter)
 
@@ -10,8 +11,8 @@ const routes = [
     component: Home
   },
   {
-    path: '/home',
-    component: Home
+    path: '/sleep',
+    component: SleepChart
   }
 ]
 
