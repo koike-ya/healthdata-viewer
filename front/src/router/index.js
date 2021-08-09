@@ -8,13 +8,11 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    component: Home,
-    children: [
-      {
-        path: 'sleep',
-        component: SleepChart
-      }
-    ]
+    component: Home
+  },
+  {
+    path: '/sleep',
+    component: SleepChart
   }
 ]
 

@@ -17,6 +17,7 @@ app.get('/isTokenExists', async function(req, res) {
   res.header('Access-Control-Allow-Origin', '*');
 
   const accessToken = await mongo.readAccessToken()
+  console.log(`accessToken: ${accessToken}`)
   res.send({'access_token': accessToken})
 })
 

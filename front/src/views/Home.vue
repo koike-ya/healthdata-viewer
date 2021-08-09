@@ -1,33 +1,31 @@
 <template>
   <div class="home">
-    <button v-on:click="connectToOura">Ouraと連携する</button>
-    <SleepChart />
+    <button v-show="token === null" v-on:click="connectToOura">Ouraと連携する</button>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
-import SleepChart from './SleepChart.vue'
 
 export default {
   name: 'Home',
-  components: {
-    SleepChart
-  },
   data: function () {
     return {
-      sleepData: undefined
+      sleepData: null,
+      token: null,
+      isTokenExists: false
     }
   },
-  mounted: async function () {
+  created: async function () {
     const backendUrl = 'http://localhost:3000'
 
-    // const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
-    // if (isTokenExists.data.access_token) {
-    //   const accessToken = isTokenExists.data.access_token
-    //   this.token = accessToken
-    //   return
-    // }
+    const isTokenExists = await axios.get(`${backendUrl}/isTokenExists`)
+    if (isTokenExists.data.access_token) {
+      const accessToken = isTokenExists.data.access_token
+      this.token = accessToken
+      this.$router.replace('sleep') // この後もコードは実行される
+      return
+    }
 
     const code = this.extractQueryValueFromURI('code')
     if (code) {
@@ -35,6 +33,7 @@ export default {
       const res = await axios.get(`${backendUrl}/fetchToken?code=${code}`)
       const accessToken = res.data.access_token
       this.token = accessToken
+      this.$router.replace('sleep') // この後もコードは実行される
     }
   },
   methods: {
