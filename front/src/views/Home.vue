@@ -12,8 +12,7 @@ export default {
   data: function () {
     return {
       sleepData: null,
-      token: null,
-      isTokenExists: false
+      token: null
     }
   },
   created: async function () {

@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import { Line, mixins } from 'vue-chartjs'
+import vuejsDatepicker from 'vuejs-datepicker'
 const { reactiveProp } = mixins
 
 Vue.config.productionTip = false
@@ -24,6 +25,8 @@ Vue.component('line-chart', {
     this.renderChart(this.chartData, this.options)
   }
 })
+
+Vue.component('datepicker', vuejsDatepicker)
 
 new Vue({
   router,
